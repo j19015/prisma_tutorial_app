@@ -13,9 +13,13 @@ interface DataType {
     createdAt: string;
 }
 
+interface FormValues {
+    title: string;
+    body: string;
+}
+
 export default function Home() {
-    const [title, setTitle] = useState('');
-    const [body, setBody] = useState('');
+    const [form]=Form.useForm();
     const [dataSource, setDataSource] = useState<DataType[]>([]);
 
     useEffect(() => {
@@ -27,28 +31,28 @@ export default function Home() {
         fetchTodos();
     },[]);
 
-    const handleTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
-        setTitle(event.target.value);
-    };
+    // const handleTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    //     setTitle(event.target.value);
+    // };
 
-    const handleBodyChange = (event: ChangeEvent<HTMLInputElement>) => {
-        setBody(event.target.value);
-    }
+    // const handleBodyChange = (event: ChangeEvent<HTMLInputElement>) => {
+    //     setBody(event.target.value);
+    // }
 
-    const handleSaveClick = async () => {
+    const handleSaveClick = async (values :FormValues) => {
+
+        console.log(values);
         const response = await fetch('api/todos',{
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({title,body}),
+            body: JSON.stringify({title: values.title,body: values.body}),
         });
 
         const todos = await response.json();
         setDataSource(todos);
-
-        setTitle('');
-        setBody('');
+        form.resetFields();
     }
 
     const handleCheckboxChange = async (id: number,is_deleted: boolean) => {
@@ -127,14 +131,14 @@ export default function Home() {
     return (
         <div style={centeredStyle}>
             <Card title="Todos" style={{ width: 1000 }}>
-            <Form layout="vertical"　onFinish={handleSaveClick}>
+            <Form layout="vertical"　onFinish={handleSaveClick} form={form}>
                 <Row gutter={16}>
                     <Col span={16}>
                         <Form.Item 
                             name="title"
                             label="Title"
                             rules={[{required: true, message:"titleを入力してください。"}]}>
-                            <Input placeholder="title"  value={title} onChange={handleTitleChange} />
+                            <Input placeholder="title"/>
                         </Form.Item>
                     </Col>
                     <Col span={16}>
@@ -142,7 +146,7 @@ export default function Home() {
                             name="body"
                             label="Body"
                             rules={[{required: true, message:"bodyを入力してください。"}]}>
-                            <Input placeholder="body" name="body" value={body} onChange={handleBodyChange} />
+                            <Input placeholder="body" name="body" />
                         </Form.Item>
                     </Col>
                     <Col span={16}>
