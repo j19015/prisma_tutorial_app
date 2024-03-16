@@ -18,8 +18,9 @@ model notes {
 }
 
 model todos {
-  id        Int      @id @default(autoincrement())
-  title     String
-  body      String
-  createdAt DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  title      String
+  body       String
+  is_deleted Boolean　@default(false)
+  createdAt  DateTime @default(now())
 }

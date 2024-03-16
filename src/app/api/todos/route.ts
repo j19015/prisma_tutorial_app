@@ -35,6 +35,24 @@ export async function DELETE(request: NextRequest){
     return NextResponse.json(todos);
 }
 
+export async function PUT(request: NextRequest){
+    const { id,is_deleted } = await request.json();
+
+    console.log(id,is_deleted);
+
+    await prisma.todos.update({
+        where:{
+            id: id,
+        },
+        data:{
+            is_deleted: is_deleted,
+        }
+    });
+
+    const todos = await getAllTodos();
+    return NextResponse.json(todos);
+}
+
 
 async function getAllTodos(){
     const todos = await prisma.todos.findMany();
