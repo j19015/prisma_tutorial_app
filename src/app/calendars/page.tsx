@@ -12,19 +12,41 @@ import jaLocale from "@fullcalendar/core/locales/ja";　//追加
 
 import { Card,Form,Row,Col,Input,Button,DatePicker,Select,Modal } from 'antd';
 
-type Event = {
-    title: string;
-    start: Date;
-    end: Date;
-    description: string;
-    backgroundColor: string;
-    borderColor: string;
-}
+import { useForm,Controller,Control } from 'react-hook-form';
 
+import { FormItem } from 'react-hook-form-antd';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+
+import z from 'zod';
+
+import moment from 'moment';
+
+
+// zodのスキーマ定義
+const schema = z.object({
+    title: z.string()
+        .min(3, "Title must be more than 3 characters")
+        .max(10, "Title must be less than 10 characters"),
+    start: z.date().refine((date) => !isNaN(date.getTime()), "Start date is required"),
+    end: z.date().refine((date) => !isNaN(date.getTime()), "End date is required"),
+    backgroundColor: z.string().min(1, "Background color is required"),
+    borderColor: z.string().min(1, "Border color is required"),
+}).refine(data => data.start < data.end, {
+    message: "Start date must be before end date",
+    path: ["start"]
+});
+
+// zodのスキーマを使用して型を取得
+type Event = z.infer<typeof schema>;
 
 
 export default function Home() {
-    const [form] = Form.useForm();
+    // useFormを使用してフォームの状態を管理
+    const { control, reset, handleSubmit } = useForm<Event>({
+        resolver: zodResolver(schema),
+        mode: 'onChange'
+    });
     const [dataSource, setDataSource] = useState<Event[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
 
@@ -38,7 +60,7 @@ export default function Home() {
     },[]);
 
     const handleSaveClick = async (values: Event) => {
-        console.log(values);
+        console.log("handleSaveClick",values);
         const response = await fetch('api/calendars',{
             method: 'POST',
             headers: {
@@ -49,8 +71,8 @@ export default function Home() {
 
         const calendars = await response.json();
         setDataSource(calendars);
-        form.resetFields();
         setModalVisible(false); // モーダルを閉じる
+        reset(); // フォームをリセット
     }
 
     const centeredStyle: React.CSSProperties = {
@@ -77,60 +99,81 @@ export default function Home() {
                     onCancel={() => setModalVisible(false)}
                     footer={null}
                 >
-                    <Form onFinish={handleSaveClick} form={form} style={{marginTop: '30px'}}>
+                    <Form onFinish={handleSubmit((data) => handleSaveClick(data))} 
+                        style={{marginTop: '30px'}}>
                         <Row gutter={16}>
                             <Col span={20}>
-                                <Form.Item 
-                                    name="title"
+                                <FormItem 
                                     label="Title"
-                                    rules={[{required: true, message:"titleを入力してください。"}]}>
+                                    name='title'
+                                    control={control}>
                                     <Input placeholder="title"/>
-                                </Form.Item>
+                                </FormItem>
                             </Col>
                             <Col span={20} style={{marginTop: '20px'}}>
-                                <Form.Item 
+                            <FormItem
+                                label="Start"
+                                name='start'
+                                control={control}>
+                                <Controller
+                                    control={control}
                                     name="start"
-                                    label="Start"
-                                    rules={[{required: true, message:"開始日を入力してください"}]}>
-                                    <DatePicker placeholder="start" name="start" />
-                                </Form.Item>
-                            </Col>
-                            <Col span={20} style={{marginTop: '20px'}}>
-                                <Form.Item 
+                                    render={({ field: { onChange, value, ...rest } }) => (
+                                        <DatePicker
+                                            {...rest}
+                                            value={value ? moment(value) : null} // ここでmomentオブジェクトに変換
+                                            onChange={(date, dateString) => onChange(date ? date.toDate() : null)} // onChangeでDateオブジェクトに変換
+                                            placeholder="start"
+                                        />
+                                    )}
+                                    />
+                            </FormItem>
+                        </Col>
+                        <Col span={20} style={{marginTop: '20px'}}>
+                            <FormItem 
+                                name='end'
+                                label="End"
+                                control={control}>
+                                <Controller
+                                    control={control}
                                     name="end"
-                                    label="End"
-                                    rules={[{required: true, message:"終了日を入力してください"}]}>
-                                    <DatePicker placeholder="end" name="end" />
-                                </Form.Item>
-                            </Col>
+                                    render={({ field: { onChange, value, ...rest } }) => (
+                                        <DatePicker
+                                            {...rest}
+                                            value={value ? moment(value) : null}
+                                            onChange={(date, dateString) => onChange(date ? date.toDate() : null)}
+                                            placeholder="end"
+                                        />
+                                    )}
+                                    />
+                            </FormItem>
+                        </Col>
                             <Col span={20} style={{marginTop: '20px'}}>
-                                <Form.Item
-                                    name="backgroundColor"
+                                <FormItem
+                                    name='backgroundColor'
                                     label="Background Color"
-                                    rules={[{required: true, message: "背景色を選択してください。"}]}>
+                                    control={control}>
                                     <Select placeholder="select a color" >
                                         <Select.Option value="red">Red</Select.Option>
                                         <Select.Option value="blue">Blue</Select.Option>
                                         <Select.Option value="green">Green</Select.Option>
                                     </Select>
-                                </Form.Item>
+                                </FormItem>
                             </Col>
                             <Col span={20} style={{marginTop: '20px'}}>
-                                <Form.Item
-                                    name="borderColor"
+                                <FormItem
+                                    name='borderColor'
                                     label="Border Color"
-                                    rules={[{required: true, message: "枠線色を選択してください。"}]}>
+                                    control={control}>
                                     <Select placeholder="select a color" >
                                         <Select.Option value="red">Red</Select.Option>
                                         <Select.Option value="blue">Blue</Select.Option>
                                         <Select.Option value="green">Green</Select.Option>
                                     </Select>
-                                </Form.Item>
+                                </FormItem>
                             </Col>
                             <Col span={16}>
-                                <Form.Item>
-                                    <Button type="primary" htmlType='submit'>Save</Button>
-                                </Form.Item>
+                                <Button type="primary" htmlType='submit'>Save</Button>
                             </Col>
                         </Row>
                     </Form>
