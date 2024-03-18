@@ -31,14 +31,6 @@ export default function Home() {
         fetchTodos();
     },[]);
 
-    // const handleTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    //     setTitle(event.target.value);
-    // };
-
-    // const handleBodyChange = (event: ChangeEvent<HTMLInputElement>) => {
-    //     setBody(event.target.value);
-    // }
-
     const handleSaveClick = async (values :FormValues) => {
 
         console.log(values);

@@ -24,3 +24,12 @@ model todos {
   is_deleted Boolean　@default(false)
   createdAt  DateTime @default(now())
 }
+
+model calendars {
+  id              Int     @id @default(autoincrement())
+  title           String  
+  start           DateTime
+  end             DateTime
+  backgroundColor String
+  borderColor     String
+}

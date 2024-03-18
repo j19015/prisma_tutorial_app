@@ -29,6 +29,9 @@ export default function Home() {
                 <Menu.Item key="3">
                     <Link href="/todos">Todoアプリ</Link>
                 </Menu.Item>
+                <Menu.Item key="4">
+                    <Link href="/calendars">Calendarアプリ</Link>
+                </Menu.Item>
             </Menu>
         </Layout.Header>
     );
