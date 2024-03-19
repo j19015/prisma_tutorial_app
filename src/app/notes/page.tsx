@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
 import React, { useState, useEffect, ChangeEvent } from 'react';
-import { Card, Row, Col, Input, Button, Table} from 'antd';
-import {ColumnType} from 'antd/es/table';
+import { Card, Row, Col, Input, Button, Table } from 'antd';
+import { ColumnType } from 'antd/es/table';
 
 interface DataType {
   key: string;
@@ -11,45 +11,45 @@ interface DataType {
   createdAt: string;
 }
 
-export default function Home(){
+export default function Home() {
   const [content, setContent] = useState('');
   const [daraSource, setDataSource] = useState<DataType[]>([]);
 
-  useEffect(()=>{
+  useEffect(() => {
     const fetchNotes = async () => {
       const response = await fetch('api/notes');
       const notes = await response.json();
       setDataSource(notes);
-    }
+    };
     fetchNotes();
-  },[]);
+  }, []);
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>)=>{
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setContent(event.target.value);
-  }
+  };
 
   const handleSaveClick = async () => {
-    const response = await fetch('api/notes',{
+    const response = await fetch('api/notes', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({content}),
+      body: JSON.stringify({ content }),
     });
 
     const notes = await response.json();
     setDataSource(notes);
 
     setContent('');
-  }
+  };
 
   const handleDeleteClick = async (id: number) => {
-    const response = await fetch(`api/notes?id=${id}`,{
-      method: 'DELETE'
+    const response = await fetch(`api/notes?id=${id}`, {
+      method: 'DELETE',
     });
     const notes = await response.json();
     setDataSource(notes);
-  }
+  };
 
   const columns: ColumnType<DataType>[] = [
     {
@@ -57,7 +57,7 @@ export default function Home(){
       dataIndex: 'createdAt',
       width: '20%',
       render: (date: Date) => new Date(date).toLocaleDateString(),
-      sorter: (a,b) =>Date.parse(a.createdAt) - Date.parse(b.createdAt),
+      sorter: (a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt),
     },
     {
       title: 'content',
@@ -66,12 +66,12 @@ export default function Home(){
     },
     {
       width: '5%',
-      render: (record: DataType) =>(
-        <Button danger onClick={()=>handleDeleteClick(record.id)}>
+      render: (record: DataType) => (
+        <Button danger onClick={() => handleDeleteClick(record.id)}>
           Delete
         </Button>
       ),
-    }
+    },
   ];
 
   const centeredStyle: React.CSSProperties = {
@@ -83,17 +83,13 @@ export default function Home(){
 
   return (
     <div style={centeredStyle}>
-      <Card title= 'Notes' style={{width: 1000}}>
+      <Card title="Notes" style={{ width: 1000 }}>
         <Row>
           <Col span={16}>
-            <Input
-              placeholder='content'
-              value={content}
-              onChange={handleInputChange}
-            />
+            <Input placeholder="content" value={content} onChange={handleInputChange} />
           </Col>
           <Col span={7} offset={1}>
-            <Button type='primary' onClick={handleSaveClick}>
+            <Button type="primary" onClick={handleSaveClick}>
               Save
             </Button>
           </Col>
@@ -105,10 +101,9 @@ export default function Home(){
           pagination={{
             pageSize: 5,
           }}
-          style = {{marginTop: 20}}
-          />
+          style={{ marginTop: 20 }}
+        />
       </Card>
     </div>
-  )
-
+  );
 }
