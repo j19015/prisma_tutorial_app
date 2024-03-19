@@ -25,7 +25,7 @@ npm ci
 起動する。
 
 ```
-npm start
+npm run dev
 ```
 
 # ブランチ運用ルール
